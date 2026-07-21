@@ -1,0 +1,32 @@
+{
+  "name": "insurance-management-platform",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Root workspace coordinator for the Insurance Management Platform (frontend + backend).",
+  "scripts": {
+    "dev:frontend": "pnpm --dir frontend dev",
+    "dev:backend": "pnpm --dir backend dev",
+    "build:frontend": "pnpm --dir frontend build",
+    "build:backend": "pnpm --dir backend build",
+    "lint:frontend": "pnpm --dir frontend lint",
+    "lint:backend": "pnpm --dir backend lint",
+    "format:frontend": "pnpm --dir frontend format",
+    "format:backend": "pnpm --dir backend format",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.9.5"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx,css,md,json}": [
+      "prettier --write"
+    ],
+    "backend/**/*.{ts,md,json}": [
+      "prettier --write"
+    ],
+    "frontend/**/*.{ts,tsx}": "pnpm --dir frontend lint:fix",
+    "backend/**/*.ts": "pnpm --dir backend lint:fix"
+  }
+}
