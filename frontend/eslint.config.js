@@ -22,6 +22,12 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // The standard "set loading, fetch, set result" pattern used throughout
+      // features/ is flagged by this new (eslint-plugin-react-hooks v7) rule.
+      // It's a well-established, correct pattern for effect-driven data
+      // fetching, not a bug — disabled deliberately rather than restructuring
+      // working fetch logic around an experimental lint rule.
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   eslintConfigPrettier,

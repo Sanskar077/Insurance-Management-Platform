@@ -1,1 +1,46 @@
 @import 'tailwindcss';
+
+@theme {
+  /* Color system — deep ink navy + warm amber accent (insurtech, not the
+     generic cream/terracotta AI palette). Cool light-blue-gray surfaces. */
+  --color-ink-950: #0b1220;
+  --color-ink-900: #14213d;
+  --color-ink-800: #1c2d52;
+  --color-ink-700: #27396b;
+  --color-ink-600: #34478a;
+
+  --color-amber-500: #ff8811;
+  --color-amber-400: #ffa03d;
+  --color-amber-100: #ffe9d1;
+
+  --color-surface: #f5f7fa;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #eceff4;
+  --color-border: #dde3ec;
+
+  --color-slate-600: #52607a;
+  --color-slate-500: #6b7691;
+
+  --color-success-600: #157a5c;
+  --color-success-100: #d9f2e8;
+  --color-danger-600: #c0324b;
+  --color-danger-100: #fbe1e6;
+  --color-warning-600: #b6720b;
+  --color-warning-100: #fff0da;
+
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-surface);
+  color: var(--color-ink-900);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}

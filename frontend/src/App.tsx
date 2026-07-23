@@ -1,11 +1,20 @@
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '@hooks/useAuth';
+import { ToastProvider } from '@components/ui/ToastProvider';
+import { AppShell } from '@components/layout/AppShell';
+import { AppRoutes } from '@routes/AppRoutes';
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-3xl font-semibold text-slate-800">Insurance Management Platform</h1>
-        <p className="mt-2 text-slate-500">Project scaffolding complete — Day 1 foundation.</p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <AppShell>
+            <AppRoutes />
+          </AppShell>
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

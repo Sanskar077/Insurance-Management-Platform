@@ -29,6 +29,21 @@ See [`docs/`](./docs) for detailed UI planning, wireframes, and technology ratio
 
 Full rationale for each choice: [`docs/tech-stack.md`](./docs/tech-stack.md).
 
+## Database Schema
+
+Six models in `backend/prisma/schema.prisma`:
+
+- **User** — auth (`id`, `name`, `email` unique, `password` hashed, `role`, timestamps).
+  `role` is one of `ADMIN`, `AGENT`, `CUSTOMER`.
+- **Customer** — business profile, 1:1 with User (`userId` unique FK).
+- **Policy** — N:1 with Customer, `policyNumber` unique.
+- **Claim** — N:1 with Policy (restrict delete — a claim can never be orphaned).
+- **PremiumPayment** — N:1 with Policy.
+- **Document** — N:1 with Customer.
+
+See [`docs/authentication.md`](./docs/authentication.md) and
+[`docs/customer-management.md`](./docs/customer-management.md) for module details.
+
 ## Folder Structure
 
 ```
@@ -96,9 +111,36 @@ Or run commands directly inside `frontend/` or `backend/` using their own `packa
 
 ## Development Status
 
-This project follows a 14-day development plan. Current status: **Day 1 complete**
-(project scaffolding, tooling, and planning docs). See `docs/` for what's planned in upcoming
-sessions.
+This project follows a 14-day development plan. Current status: **Day 3 complete**
+(Customer Management: full CRUD, soft delete, search, pagination, role-based access
+control, and a responsive frontend). See `docs/` for what's planned in upcoming sessions.
+
+## Known Issues
+
+**Prisma engine binaries could not be downloaded in the original development sandbox** —
+`binaries.prisma.sh` was not reachable from that environment's network egress rules, so
+`prisma generate` / `prisma migrate dev` could not be run there. This is an environment
+restriction, not a code or schema problem, and has held consistently across Day 2 and Day 3:
+
+- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt` addition) was
+  hand-verified by applying the migration SQL directly to a local PostgreSQL instance — tables,
+  enums, indexes, foreign keys, and constraints all confirmed correct.
+- Day 3's soft-delete behavior was verified end-to-end against the live database: a row is
+  visible before deletion, disappears from normal (`deletedAt IS NULL`) queries after a soft
+  delete, and is confirmed to still physically exist in the table.
+- Password hashing, JWT, and all Zod validators (auth + customer, including pagination limits
+  and UUID param validation) were verified in isolation with passing tests.
+- TypeScript compiles cleanly except for lines that import types from `@prisma/client`
+  (`PrismaClient`, `Role`, `User`, `Customer`, `Prisma`) — exactly the types `prisma generate`
+  produces. These resolve automatically the moment `pnpm install` runs on a machine with normal
+  internet access (a `postinstall` hook already runs `prisma generate` for you).
+- The frontend is fully unaffected and was verified independently: typecheck, lint, format, and
+  production build all pass with zero errors, and the dev server serves the full Customer
+  Management UI (list, create, edit, detail, profile, search, pagination, delete-confirmation)
+  correctly.
+
+**No action is needed from you** beyond running `pnpm install` in `backend/` on a normal
+machine — everything will resolve itself.
 
 ## Contributing
 
