@@ -17,6 +17,22 @@ enum Role {
   CUSTOMER
 }
 
+enum PolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  RENEWED
+}
+
+enum PolicyType {
+  LIFE
+  HEALTH
+  VEHICLE
+  HOME
+  TRAVEL
+  OTHER
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -61,23 +77,36 @@ model Customer {
 }
 
 model Policy {
-  id            String   @id @default(uuid())
-  customerId    String
-  policyNumber  String   @unique
-  policyType    String
-  premiumAmount Decimal  @db.Decimal(12, 2)
-  startDate     DateTime
-  endDate       DateTime
-  status        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String       @id @default(uuid())
+  customerId     String
+  policyNumber   String       @unique
+  policyType     PolicyType
+  premiumAmount  Decimal      @db.Decimal(12, 2)
+  coverageAmount Decimal      @db.Decimal(12, 2)
+  startDate      DateTime
+  endDate        DateTime
+  status         PolicyStatus @default(ACTIVE)
+  description    String?
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   customer        Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
   claims          Claim[]
   premiumPayments PremiumPayment[]
 
+  /// Renewal lineage: when a policy is renewed, a *new* Policy row is created
+  /// for the new period and the old row's status becomes RENEWED — it is
+  /// never mutated or deleted, preserving its original dates as history.
+  renewedFromId String?
+  renewedFrom   Policy?  @relation("PolicyRenewal", fields: [renewedFromId], references: [id])
+  renewedTo     Policy[] @relation("PolicyRenewal")
+
   @@index([customerId])
   @@index([status])
+  @@index([policyType])
+  @@index([deletedAt])
+  @@index([endDate])
   @@map("policies")
 }
 

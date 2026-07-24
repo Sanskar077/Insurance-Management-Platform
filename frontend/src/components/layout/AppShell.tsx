@@ -4,7 +4,10 @@ import { useAuth } from '@hooks/useAuth';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 
-const NAV_ITEMS = [{ label: 'Customers', to: '/customers' }];
+const NAV_ITEMS = [
+  { label: 'Customers', to: '/customers' },
+  { label: 'Policies', to: '/policies' },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();

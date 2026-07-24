@@ -36,13 +36,17 @@ Six models in `backend/prisma/schema.prisma`:
 - **User** — auth (`id`, `name`, `email` unique, `password` hashed, `role`, timestamps).
   `role` is one of `ADMIN`, `AGENT`, `CUSTOMER`.
 - **Customer** — business profile, 1:1 with User (`userId` unique FK).
-- **Policy** — N:1 with Customer, `policyNumber` unique.
+- **Policy** — N:1 with Customer, `policyNumber` unique (readable format `POL-2026-000001`,
+  generated from a DB sequence). `policyType`/`status` are Prisma enums. Includes
+  `coverageAmount`, `description`, `deletedAt` (soft delete), and a self-relation
+  (`renewedFromId`) linking a renewed policy to its predecessor.
 - **Claim** — N:1 with Policy (restrict delete — a claim can never be orphaned).
 - **PremiumPayment** — N:1 with Policy.
 - **Document** — N:1 with Customer.
 
-See [`docs/authentication.md`](./docs/authentication.md) and
-[`docs/customer-management.md`](./docs/customer-management.md) for module details.
+See [`docs/authentication.md`](./docs/authentication.md),
+[`docs/customer-management.md`](./docs/customer-management.md), and
+[`docs/policy-management.md`](./docs/policy-management.md) for module details.
 
 ## Folder Structure
 
@@ -111,33 +115,38 @@ Or run commands directly inside `frontend/` or `backend/` using their own `packa
 
 ## Development Status
 
-This project follows a 14-day development plan. Current status: **Day 3 complete**
-(Customer Management: full CRUD, soft delete, search, pagination, role-based access
-control, and a responsive frontend). See `docs/` for what's planned in upcoming sessions.
+This project follows a 14-day development plan. Current status: **Day 4 complete**
+(Policy Management: full CRUD, renewal with history preservation, cancellation, search,
+filters, sorting, pagination, readable policy numbers, role-based access control, and a
+responsive frontend). See `docs/` for what's planned in upcoming sessions.
 
 ## Known Issues
 
 **Prisma engine binaries could not be downloaded in the original development sandbox** —
 `binaries.prisma.sh` was not reachable from that environment's network egress rules, so
 `prisma generate` / `prisma migrate dev` could not be run there. This is an environment
-restriction, not a code or schema problem, and has held consistently across Day 2 and Day 3:
+restriction, not a code or schema problem, and has held consistently across Days 2–4:
 
-- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt` addition) was
-  hand-verified by applying the migration SQL directly to a local PostgreSQL instance — tables,
-  enums, indexes, foreign keys, and constraints all confirmed correct.
-- Day 3's soft-delete behavior was verified end-to-end against the live database: a row is
-  visible before deletion, disappears from normal (`deletedAt IS NULL`) queries after a soft
-  delete, and is confirmed to still physically exist in the table.
-- Password hashing, JWT, and all Zod validators (auth + customer, including pagination limits
-  and UUID param validation) were verified in isolation with passing tests.
-- TypeScript compiles cleanly except for lines that import types from `@prisma/client`
-  (`PrismaClient`, `Role`, `User`, `Customer`, `Prisma`) — exactly the types `prisma generate`
-  produces. These resolve automatically the moment `pnpm install` runs on a machine with normal
-  internet access (a `postinstall` hook already runs `prisma generate` for you).
-- The frontend is fully unaffected and was verified independently: typecheck, lint, format, and
-  production build all pass with zero errors, and the dev server serves the full Customer
-  Management UI (list, create, edit, detail, profile, search, pagination, delete-confirmation)
-  correctly.
+- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt`, Day 4's
+  `PolicyStatus`/`PolicyType` enums, `coverageAmount`, `description`, `deletedAt`, and the
+  renewal self-relation) was hand-verified by applying the migration SQL directly to a local
+  PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all confirmed
+  correct.
+- Day 4's renewal logic was verified end-to-end against the live database: renewing a policy
+  correctly marks the original row `RENEWED` while preserving its original dates untouched,
+  creates a new linked row via `renewedFromId`, and the `policyNumber` uniqueness constraint
+  was confirmed to reject duplicates. The `POL-<year>-<6-digit>` sequence-based number
+  generator was verified to produce the exact documented format.
+- Password hashing, JWT, and all Zod validators (auth, customer, and policy — including money
+  fields, date-range validation, and pagination/sort params) were verified in isolation with
+  passing tests.
+- TypeScript compiles cleanly except for lines that import types from `@prisma/client` —
+  exactly the types `prisma generate` produces. These resolve automatically the moment
+  `pnpm install` runs on a machine with normal internet access (a `postinstall` hook already
+  runs `prisma generate` for you).
+- The frontend is fully unaffected and was verified independently each day: typecheck, lint,
+  format, and production build all pass with zero errors, and the dev server serves the full
+  UI correctly.
 
 **No action is needed from you** beyond running `pnpm install` in `backend/` on a normal
 machine — everything will resolve itself.

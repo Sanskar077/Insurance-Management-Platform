@@ -7,6 +7,7 @@ import compression from 'compression';
 import { env } from '@config/env.js';
 import authRoutes from '@routes/auth.routes.js';
 import customerRoutes from '@routes/customer.routes.js';
+import policyRoutes from '@routes/policy.routes.js';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler.js';
 
 const app = express();
@@ -37,6 +38,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Feature routes
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/policies', policyRoutes);
 
 // 404 + centralized error handling (must be registered last)
 app.use(notFoundHandler);
