@@ -7,6 +7,11 @@ import { PolicyListPage } from '@features/policies/PolicyListPage';
 import { PolicyFormPage } from '@features/policies/PolicyFormPage';
 import { PolicyDetailPage } from '@features/policies/PolicyDetailPage';
 import { PolicyRenewPage } from '@features/policies/PolicyRenewPage';
+import { PaymentListPage } from '@features/payments/PaymentListPage';
+import { PaymentFormPage } from '@features/payments/PaymentFormPage';
+import { PaymentDetailPage } from '@features/payments/PaymentDetailPage';
+import { PaymentHistoryPage } from '@features/payments/PaymentHistoryPage';
+import { OverduePaymentsPage } from '@features/payments/OverduePaymentsPage';
 import { useAuth } from '@hooks/useAuth';
 
 export function AppRoutes() {
@@ -31,6 +36,12 @@ export function AppRoutes() {
       <Route path="/policies/:id" element={<PolicyDetailPage />} />
       <Route path="/policies/:id/edit" element={<PolicyFormPage />} />
       <Route path="/policies/:id/renew" element={<PolicyRenewPage />} />
+      <Route path="/policies/:id/payments" element={<PaymentHistoryPage />} />
+
+      <Route path="/premium-payments" element={<PaymentListPage />} />
+      <Route path="/premium-payments/overdue" element={<OverduePaymentsPage />} />
+      <Route path="/premium-payments/new" element={<PaymentFormPage />} />
+      <Route path="/premium-payments/:id" element={<PaymentDetailPage />} />
 
       <Route path="*" element={<Navigate to="/customers" replace />} />
     </Routes>

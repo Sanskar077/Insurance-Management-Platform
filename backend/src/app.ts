@@ -8,6 +8,8 @@ import { env } from '@config/env.js';
 import authRoutes from '@routes/auth.routes.js';
 import customerRoutes from '@routes/customer.routes.js';
 import policyRoutes from '@routes/policy.routes.js';
+import premiumPaymentRoutes from '@routes/premiumPayment.routes.js';
+import policyPaymentsRoutes from '@routes/policyPayments.routes.js';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler.js';
 
 const app = express();
@@ -38,7 +40,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Feature routes
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/policies/:policyId/payments', policyPaymentsRoutes);
 app.use('/api/policies', policyRoutes);
+app.use('/api/premium-payments', premiumPaymentRoutes);
 
 // 404 + centralized error handling (must be registered last)
 app.use(notFoundHandler);

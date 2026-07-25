@@ -40,13 +40,19 @@ Six models in `backend/prisma/schema.prisma`:
   generated from a DB sequence). `policyType`/`status` are Prisma enums. Includes
   `coverageAmount`, `description`, `deletedAt` (soft delete), and a self-relation
   (`renewedFromId`) linking a renewed policy to its predecessor.
+- **PremiumPayment** — N:1 with Policy, `paymentStatus` is a Prisma enum
+  (PENDING/PAID/OVERDUE/FAILED). `dueDate` is required; `paymentDate`/`paymentMethod`/
+  `transactionReference` (unique) are nullable — only populated once a payment is actually
+  made. "Overdue" is never stored — it's computed at read time from `paymentStatus = PENDING
+AND dueDate < now()`.
 - **Claim** — N:1 with Policy (restrict delete — a claim can never be orphaned).
 - **PremiumPayment** — N:1 with Policy.
 - **Document** — N:1 with Customer.
 
 See [`docs/authentication.md`](./docs/authentication.md),
-[`docs/customer-management.md`](./docs/customer-management.md), and
-[`docs/policy-management.md`](./docs/policy-management.md) for module details.
+[`docs/customer-management.md`](./docs/customer-management.md),
+[`docs/policy-management.md`](./docs/policy-management.md), and
+[`docs/premium-tracking.md`](./docs/premium-tracking.md) for module details.
 
 ## Folder Structure
 
@@ -115,31 +121,32 @@ Or run commands directly inside `frontend/` or `backend/` using their own `packa
 
 ## Development Status
 
-This project follows a 14-day development plan. Current status: **Day 4 complete**
-(Policy Management: full CRUD, renewal with history preservation, cancellation, search,
-filters, sorting, pagination, readable policy numbers, role-based access control, and a
-responsive frontend). See `docs/` for what's planned in upcoming sessions.
+This project follows a 14-day development plan. Current status: **Day 5 complete**
+(Premium Tracking: record payments, dynamic overdue detection, payment history per policy,
+search, filters, sorting, pagination, role-based access control, and a responsive frontend).
+See `docs/` for what's planned in upcoming sessions.
 
 ## Known Issues
 
 **Prisma engine binaries could not be downloaded in the original development sandbox** —
 `binaries.prisma.sh` was not reachable from that environment's network egress rules, so
 `prisma generate` / `prisma migrate dev` could not be run there. This is an environment
-restriction, not a code or schema problem, and has held consistently across Days 2–4:
+restriction, not a code or schema problem, and has held consistently across Days 2–5:
 
-- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt`, Day 4's
-  `PolicyStatus`/`PolicyType` enums, `coverageAmount`, `description`, `deletedAt`, and the
-  renewal self-relation) was hand-verified by applying the migration SQL directly to a local
-  PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all confirmed
-  correct.
-- Day 4's renewal logic was verified end-to-end against the live database: renewing a policy
-  correctly marks the original row `RENEWED` while preserving its original dates untouched,
-  creates a new linked row via `renewedFromId`, and the `policyNumber` uniqueness constraint
-  was confirmed to reject duplicates. The `POL-<year>-<6-digit>` sequence-based number
-  generator was verified to produce the exact documented format.
-- Password hashing, JWT, and all Zod validators (auth, customer, and policy — including money
-  fields, date-range validation, and pagination/sort params) were verified in isolation with
-  passing tests.
+- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt`, Day 4's Policy
+  enums/renewal relation, Day 5's `PaymentStatus` enum and `dueDate`/`paymentMethod`/
+  `transactionReference`/`remarks`) was hand-verified by applying the migration SQL directly to
+  a local PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all
+  confirmed correct.
+- Day 5's dynamic overdue detection was verified end-to-end against the live database: a query
+  mirroring the repository's `findOverdue` logic (`paymentStatus = PENDING AND dueDate < now()`)
+  correctly returned only the genuinely-overdue payment among a PENDING-but-future, a
+  PAID-but-past-due, and the target row — proving `status` alone or `dueDate` alone would have
+  given the wrong answer, but the combination is correct. The `transactionReference` uniqueness
+  constraint was also confirmed to reject duplicates.
+- Password hashing, JWT, and all Zod validators (auth, customer, policy, and premium payment —
+  including the amount-must-be-positive rule, the PAID-requires-paymentDate cross-field rule,
+  and payment method/status enums) were verified in isolation with passing tests.
 - TypeScript compiles cleanly except for lines that import types from `@prisma/client` —
   exactly the types `prisma generate` produces. These resolve automatically the moment
   `pnpm install` runs on a machine with normal internet access (a `postinstall` hook already

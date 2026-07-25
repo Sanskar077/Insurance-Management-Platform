@@ -144,10 +144,24 @@ export function PolicyDetailPage() {
         )}
       </div>
 
+      <div className="mt-4 flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-white p-6">
+        <div>
+          <p className="text-sm font-medium text-[var(--color-ink-900)]">Payment History</p>
+          <p className="mt-1 text-sm text-[var(--color-slate-500)]">
+            View all premium payments recorded for this policy.
+          </p>
+        </div>
+        <Link to={`/policies/${policy.id}/payments`}>
+          <Button variant="secondary" size="sm">
+            View Payments
+          </Button>
+        </Link>
+      </div>
+
       <div className="mt-4 rounded-lg border border-dashed border-[var(--color-border)] bg-white p-6 text-center">
-        <p className="text-sm font-medium text-[var(--color-ink-900)]">Policy History</p>
+        <p className="text-sm font-medium text-[var(--color-ink-900)]">Claims History</p>
         <p className="mt-1 text-sm text-[var(--color-slate-500)]">
-          A full claims and payment timeline for this policy will appear here in a future update.
+          A full claims timeline for this policy will appear here in a future update.
         </p>
       </div>
     </div>
