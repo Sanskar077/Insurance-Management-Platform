@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { label: 'Customers', to: '/customers' },
   { label: 'Policies', to: '/policies' },
   { label: 'Premium Payments', to: '/premium-payments' },
+  { label: 'Claims', to: '/claims' },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

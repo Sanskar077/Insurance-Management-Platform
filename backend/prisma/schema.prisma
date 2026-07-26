@@ -40,6 +40,23 @@ enum PaymentStatus {
   FAILED
 }
 
+enum ClaimStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum ClaimType {
+  LIFE
+  HEALTH
+  VEHICLE
+  HOME
+  TRAVEL
+  OTHER
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -121,19 +138,27 @@ model Policy {
 /// policy relation uses onDelete: Restrict so a policy with claims cannot be
 /// deleted out from under them.
 model Claim {
-  id             String   @id @default(uuid())
+  id             String      @id @default(uuid())
   policyId       String
-  claimAmount    Decimal  @db.Decimal(12, 2)
-  reason         String
-  status         String
-  submissionDate DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  claimNumber    String      @unique
+  claimType      ClaimType
+  claimAmount    Decimal     @db.Decimal(12, 2)
+  approvedAmount Decimal?    @db.Decimal(12, 2)
+  incidentDate   DateTime
+  claimDate      DateTime    @default(now())
+  description    String
+  status         ClaimStatus @default(SUBMITTED)
+  remarks        String?
+  deletedAt      DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   policy Policy @relation(fields: [policyId], references: [id], onDelete: Restrict)
 
   @@index([policyId])
   @@index([status])
+  @@index([claimType])
+  @@index([deletedAt])
   @@map("claims")
 }
 

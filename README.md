@@ -45,14 +45,18 @@ Six models in `backend/prisma/schema.prisma`:
   `transactionReference` (unique) are nullable — only populated once a payment is actually
   made. "Overdue" is never stored — it's computed at read time from `paymentStatus = PENDING
 AND dueDate < now()`.
-- **Claim** — N:1 with Policy (restrict delete — a claim can never be orphaned).
-- **PremiumPayment** — N:1 with Policy.
+- **Claim** — N:1 with Policy (restrict delete), `claimNumber` unique (readable format
+  `CLM-2026-000001`, generated from a DB sequence). `claimType`/`status` are Prisma enums
+  (`ClaimStatus`: SUBMITTED/UNDER_REVIEW/APPROVED/REJECTED/CLOSED). `approvedAmount` is
+  nullable (only set on approval). Status transitions are enforced by a state machine in
+  `claim.service.ts` — see `docs/claim-management.md`.
 - **Document** — N:1 with Customer.
 
 See [`docs/authentication.md`](./docs/authentication.md),
 [`docs/customer-management.md`](./docs/customer-management.md),
-[`docs/policy-management.md`](./docs/policy-management.md), and
-[`docs/premium-tracking.md`](./docs/premium-tracking.md) for module details.
+[`docs/policy-management.md`](./docs/policy-management.md),
+[`docs/premium-tracking.md`](./docs/premium-tracking.md), and
+[`docs/claim-management.md`](./docs/claim-management.md) for module details.
 
 ## Folder Structure
 
@@ -121,32 +125,32 @@ Or run commands directly inside `frontend/` or `backend/` using their own `packa
 
 ## Development Status
 
-This project follows a 14-day development plan. Current status: **Day 5 complete**
-(Premium Tracking: record payments, dynamic overdue detection, payment history per policy,
-search, filters, sorting, pagination, role-based access control, and a responsive frontend).
-See `docs/` for what's planned in upcoming sessions.
+This project follows a 14-day development plan. Current status: **Day 6 complete**
+(Claim Management: register/update/approve/reject/close claims, enforced workflow state
+machine, human-readable claim numbers, search, filters, sorting, pagination, role-based
+access control, and a responsive frontend). See `docs/` for what's planned in upcoming
+sessions.
 
 ## Known Issues
 
 **Prisma engine binaries could not be downloaded in the original development sandbox** —
 `binaries.prisma.sh` was not reachable from that environment's network egress rules, so
 `prisma generate` / `prisma migrate dev` could not be run there. This is an environment
-restriction, not a code or schema problem, and has held consistently across Days 2–5:
+restriction, not a code or schema problem, and has held consistently across Days 2–6:
 
 - Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt`, Day 4's Policy
-  enums/renewal relation, Day 5's `PaymentStatus` enum and `dueDate`/`paymentMethod`/
-  `transactionReference`/`remarks`) was hand-verified by applying the migration SQL directly to
-  a local PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all
+  enums/renewal relation, Day 5's `PaymentStatus` enum, Day 6's `ClaimStatus`/`ClaimType`
+  enums and claim-processing fields) was hand-verified by applying the migration SQL directly
+  to a local PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all
   confirmed correct.
-- Day 5's dynamic overdue detection was verified end-to-end against the live database: a query
-  mirroring the repository's `findOverdue` logic (`paymentStatus = PENDING AND dueDate < now()`)
-  correctly returned only the genuinely-overdue payment among a PENDING-but-future, a
-  PAID-but-past-due, and the target row — proving `status` alone or `dueDate` alone would have
-  given the wrong answer, but the combination is correct. The `transactionReference` uniqueness
-  constraint was also confirmed to reject duplicates.
-- Password hashing, JWT, and all Zod validators (auth, customer, policy, and premium payment —
-  including the amount-must-be-positive rule, the PAID-requires-paymentDate cross-field rule,
-  and payment method/status enums) were verified in isolation with passing tests.
+- Day 6's claim workflow was verified end-to-end against the live database: a claim was
+  created, approved (with `approvedAmount` and `remarks` set), then closed — all three writes
+  confirmed with real `SELECT`s in between. The `claimNumber` uniqueness constraint was
+  confirmed to reject duplicates, and the `claims.policyId` foreign key (`onDelete: Restrict`)
+  was confirmed to block deleting a policy that still has claims attached.
+- Password hashing, JWT, and all Zod validators across every module (auth, customer, policy,
+  premium payment, and claim — including the claim workflow state machine's transition rules)
+  were verified in isolation with passing tests.
 - TypeScript compiles cleanly except for lines that import types from `@prisma/client` —
   exactly the types `prisma generate` produces. These resolve automatically the moment
   `pnpm install` runs on a machine with normal internet access (a `postinstall` hook already

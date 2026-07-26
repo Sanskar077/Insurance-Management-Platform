@@ -12,6 +12,11 @@ import { PaymentFormPage } from '@features/payments/PaymentFormPage';
 import { PaymentDetailPage } from '@features/payments/PaymentDetailPage';
 import { PaymentHistoryPage } from '@features/payments/PaymentHistoryPage';
 import { OverduePaymentsPage } from '@features/payments/OverduePaymentsPage';
+import { ClaimListPage } from '@features/claims/ClaimListPage';
+import { ClaimFormPage } from '@features/claims/ClaimFormPage';
+import { ClaimEditPage } from '@features/claims/ClaimEditPage';
+import { ClaimDetailPage } from '@features/claims/ClaimDetailPage';
+import { ClaimHistoryPage } from '@features/claims/ClaimHistoryPage';
 import { useAuth } from '@hooks/useAuth';
 
 export function AppRoutes() {
@@ -37,11 +42,17 @@ export function AppRoutes() {
       <Route path="/policies/:id/edit" element={<PolicyFormPage />} />
       <Route path="/policies/:id/renew" element={<PolicyRenewPage />} />
       <Route path="/policies/:id/payments" element={<PaymentHistoryPage />} />
+      <Route path="/policies/:id/claims" element={<ClaimHistoryPage />} />
 
       <Route path="/premium-payments" element={<PaymentListPage />} />
       <Route path="/premium-payments/overdue" element={<OverduePaymentsPage />} />
       <Route path="/premium-payments/new" element={<PaymentFormPage />} />
       <Route path="/premium-payments/:id" element={<PaymentDetailPage />} />
+
+      <Route path="/claims" element={<ClaimListPage />} />
+      <Route path="/claims/new" element={<ClaimFormPage />} />
+      <Route path="/claims/:id" element={<ClaimDetailPage />} />
+      <Route path="/claims/:id/edit" element={<ClaimEditPage />} />
 
       <Route path="*" element={<Navigate to="/customers" replace />} />
     </Routes>
