@@ -1,5 +1,10 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import { clearAuthToken, getAuthToken, setAuthToken as persistToken } from '@lib/apiClient';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  clearAuthToken,
+  getAuthToken,
+  setAuthToken as persistToken,
+  SESSION_EXPIRED_EVENT,
+} from '@lib/apiClient';
 import type { Role } from '@app-types/customer.types';
 
 interface DecodedToken {
@@ -46,6 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAuthToken();
     setTokenState(null);
   }
+
+  // Central session-expiry handling: apiClient fires this event on any 401
+  // with a stored token, so a stale session logs out everywhere at once
+  // (Protected routes then redirect to /login).
+  useEffect(() => {
+    function handleExpired() {
+      clearAuthToken();
+      setTokenState(null);
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+  }, []);
 
   const value: AuthContextValue = {
     token,

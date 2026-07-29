@@ -1,7 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { MulterError } from 'multer';
+import { Prisma } from '@prisma/client';
 import { AppError } from '@utils/AppError.js';
+import { logger } from '@utils/logger.js';
 import { env } from '@config/env.js';
 
 export function notFoundHandler(req: Request, res: Response): void {
@@ -16,12 +18,26 @@ const MULTER_ERROR_MESSAGES: Partial<Record<MulterError['code'], string>> = {
   LIMIT_UNEXPECTED_FILE: 'Unexpected file field',
 };
 
-export function errorHandler(
-  err: unknown,
-  _req: Request,
-  res: Response,
-  _next: NextFunction,
-): void {
+/**
+ * Known Prisma request errors that map cleanly to client-facing responses.
+ * Everything else stays a generic 500 — never leak query/schema details.
+ */
+function mapPrismaError(
+  err: Prisma.PrismaClientKnownRequestError,
+): { statusCode: number; message: string } | null {
+  switch (err.code) {
+    case 'P2002':
+      return { statusCode: 409, message: 'A record with this value already exists' };
+    case 'P2025':
+      return { statusCode: 404, message: 'Record not found' };
+    case 'P2003':
+      return { statusCode: 409, message: 'Operation blocked by related records' };
+    default:
+      return null;
+  }
+}
+
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   if (err instanceof ZodError) {
     res.status(400).json({
       success: false,
@@ -42,6 +58,15 @@ export function errorHandler(
     return;
   }
 
+  // Malformed JSON body — express.json() throws a SyntaxError with a body flag.
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({
+      success: false,
+      message: 'Request body is not valid JSON',
+    });
+    return;
+  }
+
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       success: false,
@@ -50,9 +75,21 @@ export function errorHandler(
     return;
   }
 
-  // Unexpected error — never leak internal details to the client.
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    const mapped = mapPrismaError(err);
+    if (mapped) {
+      logger.warn(`Prisma ${err.code} on ${req.method} ${req.originalUrl}`);
+      res.status(mapped.statusCode).json({
+        success: false,
+        message: mapped.message,
+      });
+      return;
+    }
+  }
 
-  console.error('Unhandled error:', err);
+  // Unexpected error — log with request context, never leak internals to the
+  // client (debug detail is development-only).
+  logger.error(`Unhandled error on ${req.method} ${req.originalUrl}`, err);
   res.status(500).json({
     success: false,
     message: 'Internal server error',

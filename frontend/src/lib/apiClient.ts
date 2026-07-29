@@ -1,6 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api';
 const TOKEN_STORAGE_KEY = 'auth_token';
 
+/** Fired when the API rejects the stored token — AuthProvider listens and logs out. */
+export const SESSION_EXPIRED_EVENT = 'auth:session-expired';
+
 export class ApiError extends Error {
   public readonly status: number;
   public readonly fieldErrors?: { path: string; message: string }[];
@@ -58,6 +61,13 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const payload = contentType.includes('application/json') ? await response.json() : null;
 
   if (!response.ok) {
+    // A 401 while holding a token means the session is stale (expired or
+    // revoked) — notify AuthProvider so the app logs out cleanly. The login
+    // endpoint itself is excluded: a failed login is not an expired session.
+    if (response.status === 401 && token && !path.startsWith('/auth/')) {
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
+
     throw new ApiError(
       payload?.message ?? `Request failed with status ${response.status}`,
       response.status,

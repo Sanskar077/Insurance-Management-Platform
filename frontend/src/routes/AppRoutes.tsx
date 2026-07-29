@@ -25,6 +25,7 @@ import { DocumentListPage } from '@features/documents/DocumentListPage';
 import { DocumentUploadPage } from '@features/documents/DocumentUploadPage';
 import { DocumentDetailPage } from '@features/documents/DocumentDetailPage';
 import { UserListPage } from '@features/users/UserListPage';
+import { NotFoundPage } from '@features/errors/NotFoundPage';
 import { useAuth } from '@hooks/useAuth';
 
 /**
@@ -268,7 +269,14 @@ export function AppRoutes() {
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={
+          <Protected>
+            <NotFoundPage />
+          </Protected>
+        }
+      />
     </Routes>
   );
 }

@@ -67,6 +67,14 @@ export const premiumPaymentSearchQuerySchema = z.object({
 
 export type PremiumPaymentSearchQuery = z.infer<typeof premiumPaymentSearchQuerySchema>;
 
+/** Plain page/limit query — used by the overdue and per-policy payment lists. */
+export const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(DEFAULT_PAGE),
+  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
+});
+
+export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+
 export const premiumPaymentIdParamSchema = z.object({
   id: z.uuid('Invalid payment id'),
 });

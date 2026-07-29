@@ -10,6 +10,7 @@ import {
 } from '@middlewares/validate.js';
 import {
   createPremiumPaymentSchema,
+  paginationQuerySchema,
   premiumPaymentIdParamSchema,
   premiumPaymentSearchQuerySchema,
   updatePaymentStatusSchema,
@@ -42,6 +43,7 @@ router.get(
 router.get(
   '/overdue',
   requirePermission('payment:list'),
+  validateQuery(paginationQuerySchema),
   asyncHandler(paymentController.listOverduePayments),
 );
 

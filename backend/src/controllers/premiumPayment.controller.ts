@@ -4,6 +4,7 @@ import * as paymentService from '@services/premiumPayment.service.js';
 import { UnauthorizedError } from '@utils/AppError.js';
 import type {
   CreatePremiumPaymentInput,
+  PaginationQuery,
   PremiumPaymentSearchQuery,
   UpdatePaymentStatusInput,
   UpdatePremiumPaymentInput,
@@ -40,16 +41,14 @@ export async function listPaymentsForPolicy(
 ): Promise<void> {
   const user = requireUser(req);
   const { policyId } = res.locals.params as { policyId: string };
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 10);
+  const { page, limit } = res.locals.query as PaginationQuery;
   const result = await paymentService.listPaymentsForPolicy(policyId, page, limit, user);
   res.status(200).json({ success: true, ...result });
 }
 
 export async function listOverduePayments(req: AuthenticatedRequest, res: Response): Promise<void> {
   const user = requireUser(req);
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 10);
+  const { page, limit } = res.locals.query as PaginationQuery;
   const result = await paymentService.listOverduePayments(page, limit, user);
   res.status(200).json({ success: true, ...result });
 }
