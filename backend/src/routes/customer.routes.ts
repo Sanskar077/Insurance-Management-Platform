@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as customerController from '@controllers/customer.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import {
   validateBody,
   validateBodyByRole,
@@ -25,7 +25,7 @@ router.use(authenticate);
 // ADMIN, AGENT — create a new customer (also creates the linked login account).
 router.post(
   '/',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('customer:create'),
   validateBody(createCustomerSchema),
   asyncHandler(customerController.createCustomer),
 );
@@ -33,18 +33,22 @@ router.post(
 // ADMIN, AGENT — paginated, searchable customer list.
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('customer:list'),
   validateQuery(customerSearchQuerySchema),
   asyncHandler(customerController.listCustomers),
 );
 
 // CUSTOMER — fetch their own profile without needing to know their customer id.
-router.get('/me', authorize('CUSTOMER'), asyncHandler(customerController.getOwnProfile));
+router.get(
+  '/me',
+  requirePermission('customer:read-own'),
+  asyncHandler(customerController.getOwnProfile),
+);
 
 // ADMIN, AGENT, CUSTOMER (self only — enforced in the service layer).
 router.get(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('customer:read'),
   validateParams(customerIdParamSchema),
   asyncHandler(customerController.getCustomerById),
 );
@@ -52,7 +56,7 @@ router.get(
 // Structure-only placeholder for the future Customer History feature.
 router.get(
   '/:id/history',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('customer:history'),
   validateParams(customerIdParamSchema),
   asyncHandler(customerController.getCustomerHistory),
 );
@@ -60,7 +64,7 @@ router.get(
 // ADMIN, AGENT get the full update schema; CUSTOMER is restricted to phone/address.
 router.put(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('customer:update'),
   validateParams(customerIdParamSchema),
   validateBodyByRole({ CUSTOMER: updateOwnCustomerSchema }, updateCustomerSchema),
   asyncHandler(customerController.updateCustomer),
@@ -69,7 +73,7 @@ router.put(
 // ADMIN only — soft delete.
 router.delete(
   '/:id',
-  authorize('ADMIN'),
+  requirePermission('customer:delete'),
   validateParams(customerIdParamSchema),
   asyncHandler(customerController.deleteCustomer),
 );

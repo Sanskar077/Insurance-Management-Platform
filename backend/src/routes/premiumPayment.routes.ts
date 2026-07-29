@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as paymentController from '@controllers/premiumPayment.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import {
   validateBody,
   validateBodyByRole,
@@ -24,7 +24,7 @@ router.use(authenticate);
 // ADMIN, AGENT — record a new premium payment for an existing policy.
 router.post(
   '/',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('payment:create'),
   validateBody(createPremiumPaymentSchema),
   asyncHandler(paymentController.createPayment),
 );
@@ -32,7 +32,7 @@ router.post(
 // ADMIN, AGENT, CUSTOMER (self-scoped — enforced in the service layer).
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('payment:list'),
   validateQuery(premiumPaymentSearchQuerySchema),
   asyncHandler(paymentController.listPayments),
 );
@@ -41,13 +41,13 @@ router.get(
 // otherwise "overdue" would be parsed as an :id value.
 router.get(
   '/overdue',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('payment:list'),
   asyncHandler(paymentController.listOverduePayments),
 );
 
 router.get(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('payment:read'),
   validateParams(premiumPaymentIdParamSchema),
   asyncHandler(paymentController.getPaymentById),
 );
@@ -56,7 +56,7 @@ router.get(
 // (+ paymentDate/transactionReference) via the role-aware schema selection.
 router.put(
   '/:id',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('payment:update'),
   validateParams(premiumPaymentIdParamSchema),
   validateBodyByRole({ AGENT: updatePaymentStatusSchema }, updatePremiumPaymentSchema),
   asyncHandler(paymentController.updatePayment),

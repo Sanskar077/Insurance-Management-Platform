@@ -2,7 +2,7 @@ import { prisma } from '@lib/prisma.js';
 import type { Prisma, User, Customer } from '@prisma/client';
 import { hashPassword, comparePassword } from '@utils/password.js';
 import { signAccessToken } from '@utils/jwt.js';
-import { ConflictError, UnauthorizedError } from '@utils/AppError.js';
+import { ConflictError, ForbiddenError, UnauthorizedError } from '@utils/AppError.js';
 import type { RegisterInput, LoginInput } from '@validators/auth.validator.js';
 
 export interface AuthResult {
@@ -68,6 +68,20 @@ export async function createUserWithCustomerProfile(
 }
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
+  // Day 10 RBAC hardening: public registration only creates CUSTOMER
+  // accounts. Staff accounts (ADMIN/AGENT) are created by an ADMIN via
+  // POST /api/users — with one bootstrap exception: while no ADMIN exists
+  // yet (fresh install), the first privileged registration is allowed so
+  // the system can be initialized.
+  if (input.role !== 'CUSTOMER') {
+    const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+    if (adminCount > 0) {
+      throw new ForbiddenError(
+        'Staff accounts are created by an administrator. Ask an ADMIN to add you via User Management.',
+      );
+    }
+  }
+
   if (input.role === 'CUSTOMER') {
     // Validator guarantees these fields are present when role is CUSTOMER.
     const { user } = await createUserWithCustomerProfile({

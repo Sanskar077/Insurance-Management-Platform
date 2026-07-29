@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as paymentController from '@controllers/premiumPayment.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import { validateParams } from '@middlewares/validate.js';
 import { policyIdParamSchema } from '@validators/premiumPayment.validator.js';
 import { asyncHandler } from '@utils/asyncHandler.js';
@@ -15,7 +15,7 @@ router.use(authenticate);
 // ADMIN, AGENT, CUSTOMER (self-scoped — enforced in the service layer).
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('payment:list'),
   validateParams(policyIdParamSchema),
   asyncHandler(paymentController.listPaymentsForPolicy),
 );

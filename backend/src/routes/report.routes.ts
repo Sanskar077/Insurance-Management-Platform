@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as reportController from '@controllers/report.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import { validateQuery } from '@middlewares/validate.js';
 import { reportRangeQuerySchema } from '@validators/report.validator.js';
 import { asyncHandler } from '@utils/asyncHandler.js';
@@ -12,7 +12,7 @@ router.use(authenticate);
 
 // Reports aggregate figures across ALL customers, so the whole module is
 // ADMIN/AGENT-only — a CUSTOMER never sees other people's totals.
-router.use(authorize('ADMIN', 'AGENT'));
+router.use(requirePermission('report:view'));
 
 router.get('/summary', asyncHandler(reportController.getDashboardSummary));
 

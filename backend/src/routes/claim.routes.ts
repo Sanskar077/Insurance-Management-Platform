@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as claimController from '@controllers/claim.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import { validateBody, validateParams, validateQuery } from '@middlewares/validate.js';
 import {
   approveClaimSchema,
@@ -22,7 +22,7 @@ router.use(authenticate);
 // enforced in the service layer).
 router.post(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('claim:create'),
   validateBody(createClaimSchema),
   asyncHandler(claimController.createClaim),
 );
@@ -30,14 +30,14 @@ router.post(
 // ADMIN, AGENT, CUSTOMER (self-scoped — enforced in the service layer).
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('claim:list'),
   validateQuery(claimSearchQuerySchema),
   asyncHandler(claimController.listClaims),
 );
 
 router.get(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('claim:read'),
   validateParams(claimIdParamSchema),
   asyncHandler(claimController.getClaimById),
 );
@@ -45,7 +45,7 @@ router.get(
 // ADMIN, AGENT only — CUSTOMER has view/create-only access per the Day 6 spec.
 router.put(
   '/:id',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('claim:update'),
   validateParams(claimIdParamSchema),
   validateBody(updateClaimSchema),
   asyncHandler(claimController.updateClaim),
@@ -53,7 +53,7 @@ router.put(
 
 router.post(
   '/:id/approve',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('claim:approve'),
   validateParams(claimIdParamSchema),
   validateBody(approveClaimSchema),
   asyncHandler(claimController.approveClaim),
@@ -61,7 +61,7 @@ router.post(
 
 router.post(
   '/:id/reject',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('claim:reject'),
   validateParams(claimIdParamSchema),
   validateBody(rejectClaimSchema),
   asyncHandler(claimController.rejectClaim),
@@ -69,7 +69,7 @@ router.post(
 
 router.post(
   '/:id/close',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('claim:close'),
   validateParams(claimIdParamSchema),
   validateBody(closeClaimSchema),
   asyncHandler(claimController.closeClaim),

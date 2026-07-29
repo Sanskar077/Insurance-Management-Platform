@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as documentController from '@controllers/document.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import { upload } from '@middlewares/upload.js';
 import { validateBody, validateParams, validateQuery } from '@middlewares/validate.js';
 import {
@@ -18,7 +18,7 @@ router.use(authenticate);
 // ADMIN, AGENT only — CUSTOMER has view/download-only access per spec.
 router.post(
   '/',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('document:upload'),
   upload.single('file'),
   validateBody(uploadDocumentMetadataSchema),
   asyncHandler(documentController.uploadDocument),
@@ -27,21 +27,21 @@ router.post(
 // ADMIN, AGENT, CUSTOMER (self-scoped — enforced in the service layer).
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('document:list'),
   validateQuery(documentSearchQuerySchema),
   asyncHandler(documentController.listDocuments),
 );
 
 router.get(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('document:read'),
   validateParams(documentIdParamSchema),
   asyncHandler(documentController.getDocumentById),
 );
 
 router.get(
   '/:id/download',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('document:download'),
   validateParams(documentIdParamSchema),
   asyncHandler(documentController.downloadDocument),
 );
@@ -49,7 +49,7 @@ router.get(
 // ADMIN, AGENT only — soft delete.
 router.delete(
   '/:id',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('document:delete'),
   validateParams(documentIdParamSchema),
   asyncHandler(documentController.deleteDocument),
 );

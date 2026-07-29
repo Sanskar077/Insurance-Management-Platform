@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as policyController from '@controllers/policy.controller.js';
 import { authenticate } from '@middlewares/authenticate.js';
-import { authorize } from '@middlewares/authorize.js';
+import { requirePermission } from '@middlewares/requirePermission.js';
 import { validateBody, validateParams, validateQuery } from '@middlewares/validate.js';
 import {
   createPolicySchema,
@@ -20,7 +20,7 @@ router.use(authenticate);
 // ADMIN, AGENT — create a new policy for an existing customer.
 router.post(
   '/',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('policy:create'),
   validateBody(createPolicySchema),
   asyncHandler(policyController.createPolicy),
 );
@@ -28,14 +28,14 @@ router.post(
 // ADMIN, AGENT, CUSTOMER (self-scoped — enforced in the service layer).
 router.get(
   '/',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('policy:list'),
   validateQuery(policySearchQuerySchema),
   asyncHandler(policyController.listPolicies),
 );
 
 router.get(
   '/:id',
-  authorize('ADMIN', 'AGENT', 'CUSTOMER'),
+  requirePermission('policy:read'),
   validateParams(policyIdParamSchema),
   asyncHandler(policyController.getPolicyById),
 );
@@ -43,7 +43,7 @@ router.get(
 // ADMIN, AGENT only — CUSTOMER has view-only access per the Day 4 spec.
 router.put(
   '/:id',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('policy:update'),
   validateParams(policyIdParamSchema),
   validateBody(updatePolicySchema),
   asyncHandler(policyController.updatePolicy),
@@ -51,14 +51,14 @@ router.put(
 
 router.post(
   '/:id/cancel',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('policy:cancel'),
   validateParams(policyIdParamSchema),
   asyncHandler(policyController.cancelPolicy),
 );
 
 router.post(
   '/:id/renew',
-  authorize('ADMIN', 'AGENT'),
+  requirePermission('policy:renew'),
   validateParams(policyIdParamSchema),
   validateBody(renewPolicySchema),
   asyncHandler(policyController.renewPolicy),
@@ -67,7 +67,7 @@ router.post(
 // ADMIN only — soft delete.
 router.delete(
   '/:id',
-  authorize('ADMIN'),
+  requirePermission('policy:delete'),
   validateParams(policyIdParamSchema),
   asyncHandler(policyController.deletePolicy),
 );
