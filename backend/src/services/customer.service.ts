@@ -7,6 +7,7 @@ import { buildPaginationMeta, type PaginatedResult } from '@app-types/pagination
 import { toCustomerDto, type CustomerDto } from '@app-types/customer.types.js';
 import type {
   CreateCustomerInput,
+  CustomerSearchQuery,
   UpdateCustomerInput,
   UpdateOwnCustomerInput,
 } from '@validators/customer.validator.js';
@@ -75,20 +76,20 @@ export async function getOwnProfile(requester: RequestingUser): Promise<Customer
 }
 
 export async function listCustomers(
-  page: number,
-  limit: number,
-  search: string | undefined,
+  query: CustomerSearchQuery,
 ): Promise<PaginatedResult<CustomerDto>> {
-  const skip = (page - 1) * limit;
+  const skip = (query.page - 1) * query.limit;
   const { data, totalRecords } = await customerRepository.findMany({
     skip,
-    take: limit,
-    search,
+    take: query.limit,
+    search: query.search,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
   });
 
   return {
     data: data.map(toCustomerDto),
-    meta: buildPaginationMeta(totalRecords, page, limit),
+    meta: buildPaginationMeta(totalRecords, query.page, query.limit),
   };
 }
 

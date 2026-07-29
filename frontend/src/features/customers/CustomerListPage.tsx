@@ -12,12 +12,24 @@ import { Pagination } from '@components/ui/Pagination';
 import { SearchBar } from '@components/ui/SearchBar';
 import { ConfirmDialog } from '@components/ui/ConfirmDialog';
 import { Avatar } from '@components/ui/Avatar';
+import { Select } from '@components/ui/Select';
 import { ApiError } from '@lib/apiClient';
+
+type SortKey = 'createdAt-desc' | 'createdAt-asc' | 'fullName-asc' | 'fullName-desc';
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'createdAt-desc', label: 'Newest first' },
+  { value: 'createdAt-asc', label: 'Oldest first' },
+  { value: 'fullName-asc', label: 'Name A–Z' },
+  { value: 'fullName-desc', label: 'Name Z–A' },
+];
 
 export function CustomerListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '10');
   const search = searchParams.get('search') ?? '';
+  const sort = (searchParams.get('sort') as SortKey | null) ?? 'createdAt-desc';
 
   const { role } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -35,8 +47,15 @@ export function CustomerListPage() {
 
   const fetchCustomers = useCallback(async () => {
     setStatus('loading');
+    const [sortBy, sortOrder] = sort.split('-') as ['fullName' | 'createdAt', 'asc' | 'desc'];
     try {
-      const result = await listCustomers({ page, limit: 10, search: search || undefined });
+      const result = await listCustomers({
+        page,
+        limit,
+        search: search || undefined,
+        sortBy,
+        sortOrder,
+      });
       setCustomers(result.data);
       setMeta(result.meta);
       setStatus('idle');
@@ -44,14 +63,24 @@ export function CustomerListPage() {
       setErrorMessage(error instanceof ApiError ? error.message : 'Failed to load customers');
       setStatus('error');
     }
-  }, [page, search]);
+  }, [page, limit, search, sort]);
 
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
 
+  function updateParams(partial: Record<string, string | undefined>) {
+    const params = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(partial)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    params.set('page', '1');
+    setSearchParams(params);
+  }
+
   function handleSearch(value: string) {
-    setSearchParams(value ? { search: value, page: '1' } : {});
+    updateParams({ search: value || undefined });
   }
 
   function handlePageChange(nextPage: number) {
@@ -89,8 +118,21 @@ export function CustomerListPage() {
         {canCreate && <Button onClick={() => navigate('/customers/new')}>+ New Customer</Button>}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-end gap-3">
         <SearchBar initialValue={search} onSearch={handleSearch} />
+        <div className="w-44">
+          <Select
+            label="Sort by"
+            value={sort}
+            onChange={(event) => updateParams({ sort: event.target.value })}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white">
@@ -167,7 +209,15 @@ export function CustomerListPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination
+                meta={meta}
+                onPageChange={handlePageChange}
+                itemLabel="customers"
+                pageSize={limit}
+                onPageSizeChange={(size) => updateParams({ limit: String(size) })}
+              />
+            )}
           </>
         )}
       </div>

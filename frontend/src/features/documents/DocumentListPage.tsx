@@ -19,6 +19,7 @@ import { ApiError } from '@lib/apiClient';
 export function DocumentListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '10');
   const search = searchParams.get('search') ?? '';
   const entityType = (searchParams.get('entityType') as DocumentEntityType | null) ?? undefined;
   const documentType = (searchParams.get('documentType') as DocumentType | null) ?? undefined;
@@ -42,7 +43,7 @@ export function DocumentListPage() {
     try {
       const result = await listDocuments({
         page,
-        limit: 10,
+        limit,
         search: search || undefined,
         entityType,
         documentType,
@@ -54,7 +55,7 @@ export function DocumentListPage() {
       setErrorMessage(error instanceof ApiError ? error.message : 'Failed to load documents');
       setStatus('error');
     }
-  }, [page, search, entityType, documentType]);
+  }, [page, limit, search, entityType, documentType]);
 
   useEffect(() => {
     fetchDocuments();
@@ -242,7 +243,15 @@ export function DocumentListPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination
+                meta={meta}
+                onPageChange={handlePageChange}
+                itemLabel="documents"
+                pageSize={limit}
+                onPageSizeChange={(size) => updateParams({ limit: String(size) })}
+              />
+            )}
           </>
         )}
       </div>

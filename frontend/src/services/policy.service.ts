@@ -27,6 +27,8 @@ export interface ListPoliciesParams {
   status?: PolicyStatus;
   policyType?: PolicyType;
   expired?: boolean;
+  minPremium?: number;
+  maxPremium?: number;
   sortBy?: 'startDate' | 'endDate' | 'premiumAmount';
   sortOrder?: 'asc' | 'desc';
 }
@@ -41,6 +43,8 @@ export async function listPolicies(params: ListPoliciesParams): Promise<Paginate
       status: params.status,
       policyType: params.policyType,
       expired: params.expired === undefined ? undefined : String(params.expired),
+      minPremium: params.minPremium,
+      maxPremium: params.maxPremium,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     },

@@ -74,6 +74,8 @@ export const claimSearchQuerySchema = z.object({
   policyId: z.uuid().optional(),
   dateFrom: z.coerce.date().optional(),
   dateTo: z.coerce.date().optional(),
+  minAmount: z.coerce.number().nonnegative().optional(),
+  maxAmount: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(['claimDate', 'incidentDate', 'claimAmount']).default('claimDate'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

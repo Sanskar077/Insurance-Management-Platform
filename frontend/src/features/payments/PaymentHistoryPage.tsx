@@ -141,7 +141,9 @@ export function PaymentHistoryPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination meta={meta} onPageChange={handlePageChange} itemLabel="payments" />
+            )}
           </>
         )}
       </div>

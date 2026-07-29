@@ -10,6 +10,8 @@ export interface FindManyOptions {
   policyId?: string;
   dateFrom?: Date;
   dateTo?: Date;
+  minAmount?: number;
+  maxAmount?: number;
   customerId?: string;
   sortBy: 'claimDate' | 'incidentDate' | 'claimAmount';
   sortOrder: 'asc' | 'desc';
@@ -40,6 +42,13 @@ function buildWhere(options: FindManyOptions): Prisma.ClaimWhereInput {
     where.claimDate = {
       ...(options.dateFrom ? { gte: options.dateFrom } : {}),
       ...(options.dateTo ? { lte: options.dateTo } : {}),
+    };
+  }
+
+  if (options.minAmount !== undefined || options.maxAmount !== undefined) {
+    where.claimAmount = {
+      ...(options.minAmount !== undefined ? { gte: options.minAmount } : {}),
+      ...(options.maxAmount !== undefined ? { lte: options.maxAmount } : {}),
     };
   }
 

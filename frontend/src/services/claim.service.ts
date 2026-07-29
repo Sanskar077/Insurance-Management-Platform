@@ -31,6 +31,8 @@ export interface ListClaimsParams {
   policyId?: string;
   dateFrom?: string;
   dateTo?: string;
+  minAmount?: number;
+  maxAmount?: number;
   sortBy?: 'claimDate' | 'incidentDate' | 'claimAmount';
   sortOrder?: 'asc' | 'desc';
 }
@@ -47,6 +49,8 @@ export async function listClaims(params: ListClaimsParams): Promise<PaginatedCla
       policyId: params.policyId,
       dateFrom: params.dateFrom,
       dateTo: params.dateTo,
+      minAmount: params.minAmount,
+      maxAmount: params.maxAmount,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     },

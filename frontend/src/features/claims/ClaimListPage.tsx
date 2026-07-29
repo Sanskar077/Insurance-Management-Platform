@@ -13,6 +13,7 @@ import { Pagination } from '@components/ui/Pagination';
 import { SearchBar } from '@components/ui/SearchBar';
 import { Select } from '@components/ui/Select';
 import { StatusBadge } from '@components/ui/StatusBadge';
+import { RangeFilter } from '@components/ui/RangeFilter';
 import { ApiError } from '@lib/apiClient';
 
 function formatMoney(value: string): string {
@@ -22,9 +23,12 @@ function formatMoney(value: string): string {
 export function ClaimListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '10');
   const search = searchParams.get('search') ?? '';
   const status = (searchParams.get('status') as ClaimStatus | null) ?? undefined;
   const claimType = (searchParams.get('claimType') as ClaimType | null) ?? undefined;
+  const minAmount = searchParams.get('minAmount') ?? '';
+  const maxAmount = searchParams.get('maxAmount') ?? '';
 
   const { role } = useAuth();
   const navigate = useNavigate();
@@ -39,10 +43,12 @@ export function ClaimListPage() {
     try {
       const result = await listClaims({
         page,
-        limit: 10,
+        limit,
         search: search || undefined,
         status,
         claimType,
+        minAmount: minAmount ? Number(minAmount) : undefined,
+        maxAmount: maxAmount ? Number(maxAmount) : undefined,
       });
       setClaims(result.data);
       setMeta(result.meta);
@@ -51,7 +57,7 @@ export function ClaimListPage() {
       setErrorMessage(error instanceof ApiError ? error.message : 'Failed to load claims');
       setLoadStatus('error');
     }
-  }, [page, search, status, claimType]);
+  }, [page, limit, search, status, claimType, minAmount, maxAmount]);
 
   useEffect(() => {
     fetchClaims();
@@ -123,6 +129,14 @@ export function ClaimListPage() {
             ))}
           </Select>
         </div>
+        <RangeFilter
+          label="Claim amount ($)"
+          min={minAmount}
+          max={maxAmount}
+          onChange={(nextMin, nextMax) =>
+            updateParams({ minAmount: nextMin || undefined, maxAmount: nextMax || undefined })
+          }
+        />
       </div>
 
       <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white">
@@ -193,7 +207,15 @@ export function ClaimListPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination
+                meta={meta}
+                onPageChange={handlePageChange}
+                itemLabel="claims"
+                pageSize={limit}
+                onPageSizeChange={(size) => updateParams({ limit: String(size) })}
+              />
+            )}
           </>
         )}
       </div>

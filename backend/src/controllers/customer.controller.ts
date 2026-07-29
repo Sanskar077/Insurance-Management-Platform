@@ -16,8 +16,8 @@ export async function createCustomer(req: AuthenticatedRequest, res: Response): 
 }
 
 export async function listCustomers(_req: AuthenticatedRequest, res: Response): Promise<void> {
-  const { page, limit, search } = res.locals.query as CustomerSearchQuery;
-  const result = await customerService.listCustomers(page, limit, search);
+  const query = res.locals.query as CustomerSearchQuery;
+  const result = await customerService.listCustomers(query);
   res.status(200).json({ success: true, ...result });
 }
 

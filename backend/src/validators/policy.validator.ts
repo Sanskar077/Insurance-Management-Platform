@@ -63,6 +63,8 @@ export const policySearchQuerySchema = z.object({
   status: z.enum(POLICY_STATUSES).optional(),
   policyType: z.enum(POLICY_TYPES).optional(),
   expired: z.coerce.boolean().optional(),
+  minPremium: z.coerce.number().nonnegative().optional(),
+  maxPremium: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(['startDate', 'endDate', 'premiumAmount']).default('startDate'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

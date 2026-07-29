@@ -119,7 +119,13 @@ export function OverduePaymentsPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination
+                meta={meta}
+                onPageChange={handlePageChange}
+                itemLabel="overdue payments"
+              />
+            )}
           </>
         )}
       </div>

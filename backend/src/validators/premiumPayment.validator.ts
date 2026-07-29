@@ -59,6 +59,8 @@ export const premiumPaymentSearchQuerySchema = z.object({
   paymentMethod: z.enum(PAYMENT_METHODS).optional(),
   dateFrom: z.coerce.date().optional(),
   dateTo: z.coerce.date().optional(),
+  minAmount: z.coerce.number().nonnegative().optional(),
+  maxAmount: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(['dueDate', 'paymentDate', 'amount']).default('dueDate'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

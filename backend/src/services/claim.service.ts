@@ -147,6 +147,8 @@ export async function listClaims(
     policyId: query.policyId,
     dateFrom: query.dateFrom,
     dateTo: query.dateTo,
+    minAmount: query.minAmount,
+    maxAmount: query.maxAmount,
     customerId,
     sortBy: query.sortBy,
     sortOrder: query.sortOrder,

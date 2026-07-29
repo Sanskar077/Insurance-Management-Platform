@@ -13,6 +13,7 @@ import policyPaymentsRoutes from '@routes/policyPayments.routes.js';
 import claimRoutes from '@routes/claim.routes.js';
 import documentRoutes from '@routes/document.routes.js';
 import reportRoutes from '@routes/report.routes.js';
+import searchRoutes from '@routes/search.routes.js';
 import { errorHandler, notFoundHandler } from '@middlewares/errorHandler.js';
 
 const app = express();
@@ -49,6 +50,7 @@ app.use('/api/premium-payments', premiumPaymentRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/search', searchRoutes);
 
 // 404 + centralized error handling (must be registered last)
 app.use(notFoundHandler);

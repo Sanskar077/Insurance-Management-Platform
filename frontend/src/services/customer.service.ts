@@ -22,10 +22,18 @@ export async function listCustomers(params: {
   page: number;
   limit: number;
   search?: string;
+  sortBy?: 'fullName' | 'createdAt' | 'dob';
+  sortOrder?: 'asc' | 'desc';
 }): Promise<PaginatedCustomers> {
   const result = await apiRequest<ListEnvelope>('/customers', {
     method: 'GET',
-    query: { page: params.page, limit: params.limit, search: params.search },
+    query: {
+      page: params.page,
+      limit: params.limit,
+      search: params.search,
+      sortBy: params.sortBy,
+      sortOrder: params.sortOrder,
+    },
   });
   return { data: result.data, meta: result.meta };
 }

@@ -44,6 +44,8 @@ export const customerSearchQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(DEFAULT_PAGE),
   limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
   search: z.string().trim().min(1).optional(),
+  sortBy: z.enum(['fullName', 'createdAt', 'dob']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export type CustomerSearchQuery = z.infer<typeof customerSearchQuerySchema>;

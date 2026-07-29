@@ -5,6 +5,8 @@ export interface FindManyOptions {
   skip: number;
   take: number;
   search?: string;
+  sortBy?: 'fullName' | 'createdAt' | 'dob';
+  sortOrder?: 'asc' | 'desc';
 }
 
 const notDeleted: Prisma.CustomerWhereInput = { deletedAt: null };
@@ -42,7 +44,13 @@ export const customerRepository = {
     return prisma.customer.findFirst({ where: { email, ...notDeleted } });
   },
 
-  async findMany({ skip, take, search }: FindManyOptions) {
+  async findMany({
+    skip,
+    take,
+    search,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+  }: FindManyOptions) {
     const where: Prisma.CustomerWhereInput = {
       ...notDeleted,
       ...buildSearchWhere(search),
@@ -53,7 +61,7 @@ export const customerRepository = {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortBy]: sortOrder },
       }),
       prisma.customer.count({ where }),
     ]);

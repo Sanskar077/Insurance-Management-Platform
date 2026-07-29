@@ -131,7 +131,7 @@ export function ClaimHistoryPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && <Pagination meta={meta} onPageChange={handlePageChange} itemLabel="claims" />}
           </>
         )}
       </div>

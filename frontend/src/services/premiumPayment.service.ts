@@ -27,6 +27,8 @@ export interface ListPaymentsParams {
   paymentMethod?: PaymentMethod;
   dateFrom?: string;
   dateTo?: string;
+  minAmount?: number;
+  maxAmount?: number;
   sortBy?: 'dueDate' | 'paymentDate' | 'amount';
   sortOrder?: 'asc' | 'desc';
 }
@@ -42,6 +44,8 @@ export async function listPayments(params: ListPaymentsParams): Promise<Paginate
       paymentMethod: params.paymentMethod,
       dateFrom: params.dateFrom,
       dateTo: params.dateTo,
+      minAmount: params.minAmount,
+      maxAmount: params.maxAmount,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     },

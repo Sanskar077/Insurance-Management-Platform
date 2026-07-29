@@ -84,6 +84,8 @@ export async function listPolicies(
     status: query.status,
     policyType: query.policyType,
     expired: query.expired,
+    minPremium: query.minPremium,
+    maxPremium: query.maxPremium,
     customerId,
     sortBy: query.sortBy,
     sortOrder: query.sortOrder,

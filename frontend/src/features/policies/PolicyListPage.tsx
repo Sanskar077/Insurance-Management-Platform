@@ -15,6 +15,7 @@ import { SearchBar } from '@components/ui/SearchBar';
 import { Select } from '@components/ui/Select';
 import { StatusBadge } from '@components/ui/StatusBadge';
 import { ConfirmDialog } from '@components/ui/ConfirmDialog';
+import { RangeFilter } from '@components/ui/RangeFilter';
 import { ApiError } from '@lib/apiClient';
 
 function formatMoney(value: string): string {
@@ -24,9 +25,12 @@ function formatMoney(value: string): string {
 export function PolicyListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '10');
   const search = searchParams.get('search') ?? '';
   const status = (searchParams.get('status') as PolicyStatus | null) ?? undefined;
   const policyType = (searchParams.get('policyType') as PolicyType | null) ?? undefined;
+  const minPremium = searchParams.get('minPremium') ?? '';
+  const maxPremium = searchParams.get('maxPremium') ?? '';
 
   const { role } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -49,10 +53,12 @@ export function PolicyListPage() {
     try {
       const result = await listPolicies({
         page,
-        limit: 10,
+        limit,
         search: search || undefined,
         status,
         policyType,
+        minPremium: minPremium ? Number(minPremium) : undefined,
+        maxPremium: maxPremium ? Number(maxPremium) : undefined,
       });
       setPolicies(result.data);
       setMeta(result.meta);
@@ -61,7 +67,7 @@ export function PolicyListPage() {
       setErrorMessage(error instanceof ApiError ? error.message : 'Failed to load policies');
       setLoadStatus('error');
     }
-  }, [page, search, status, policyType]);
+  }, [page, limit, search, status, policyType, minPremium, maxPremium]);
 
   useEffect(() => {
     fetchPolicies();
@@ -163,6 +169,14 @@ export function PolicyListPage() {
             ))}
           </Select>
         </div>
+        <RangeFilter
+          label="Premium ($)"
+          min={minPremium}
+          max={maxPremium}
+          onChange={(nextMin, nextMax) =>
+            updateParams({ minPremium: nextMin || undefined, maxPremium: nextMax || undefined })
+          }
+        />
       </div>
 
       <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white">
@@ -266,7 +280,15 @@ export function PolicyListPage() {
                 ))}
               </tbody>
             </table>
-            {meta && <Pagination meta={meta} onPageChange={handlePageChange} />}
+            {meta && (
+              <Pagination
+                meta={meta}
+                onPageChange={handlePageChange}
+                itemLabel="policies"
+                pageSize={limit}
+                onPageSizeChange={(size) => updateParams({ limit: String(size) })}
+              />
+            )}
           </>
         )}
       </div>

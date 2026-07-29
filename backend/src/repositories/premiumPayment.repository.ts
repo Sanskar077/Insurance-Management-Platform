@@ -9,6 +9,8 @@ export interface FindManyOptions {
   paymentMethod?: string;
   dateFrom?: Date;
   dateTo?: Date;
+  minAmount?: number;
+  maxAmount?: number;
   policyId?: string;
   customerId?: string;
   sortBy: 'dueDate' | 'paymentDate' | 'amount';
@@ -38,6 +40,13 @@ function buildWhere(options: FindManyOptions): Prisma.PremiumPaymentWhereInput {
     where.dueDate = {
       ...(options.dateFrom ? { gte: options.dateFrom } : {}),
       ...(options.dateTo ? { lte: options.dateTo } : {}),
+    };
+  }
+
+  if (options.minAmount !== undefined || options.maxAmount !== undefined) {
+    where.amount = {
+      ...(options.minAmount !== undefined ? { gte: options.minAmount } : {}),
+      ...(options.maxAmount !== undefined ? { lte: options.maxAmount } : {}),
     };
   }
 

@@ -112,6 +112,8 @@ export async function listPremiumPayments(
     paymentMethod: query.paymentMethod,
     dateFrom: query.dateFrom,
     dateTo: query.dateTo,
+    minAmount: query.minAmount,
+    maxAmount: query.maxAmount,
     customerId,
     sortBy: query.sortBy,
     sortOrder: query.sortOrder,

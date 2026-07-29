@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@hooks/useAuth';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { GlobalSearch } from '@components/layout/GlobalSearch';
 
 const NAV_ITEMS: { label: string; to: string; hideForCustomer?: boolean }[] = [
   { label: 'Dashboard', to: '/dashboard', hideForCustomer: true },
@@ -61,13 +62,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           </p>
 
           {isAuthenticated ? (
-            <div className="ml-auto flex items-center gap-3">
-              <span className="rounded-full bg-[var(--color-amber-100)] px-3 py-1 text-xs font-semibold text-[var(--color-amber-500)]">
-                {role}
-              </span>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Log out
-              </Button>
+            <div className="ml-4 flex flex-1 items-center justify-between gap-3">
+              <GlobalSearch />
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-[var(--color-amber-100)] px-3 py-1 text-xs font-semibold text-[var(--color-amber-500)]">
+                  {role}
+                </span>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  Log out
+                </Button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSetToken} className="ml-auto flex items-end gap-2">

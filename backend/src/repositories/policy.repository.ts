@@ -8,6 +8,8 @@ export interface FindManyOptions {
   status?: PolicyStatus;
   policyType?: PolicyType;
   expired?: boolean;
+  minPremium?: number;
+  maxPremium?: number;
   customerId?: string;
   sortBy: 'startDate' | 'endDate' | 'premiumAmount';
   sortOrder: 'asc' | 'desc';
@@ -32,6 +34,13 @@ function buildWhere(options: FindManyOptions): Prisma.PolicyWhereInput {
 
   if (options.expired !== undefined) {
     where.endDate = options.expired ? { lt: new Date() } : { gte: new Date() };
+  }
+
+  if (options.minPremium !== undefined || options.maxPremium !== undefined) {
+    where.premiumAmount = {
+      ...(options.minPremium !== undefined ? { gte: options.minPremium } : {}),
+      ...(options.maxPremium !== undefined ? { lte: options.maxPremium } : {}),
+    };
   }
 
   if (options.search) {
