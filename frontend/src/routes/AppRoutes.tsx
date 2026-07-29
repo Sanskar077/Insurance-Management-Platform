@@ -17,6 +17,9 @@ import { ClaimFormPage } from '@features/claims/ClaimFormPage';
 import { ClaimEditPage } from '@features/claims/ClaimEditPage';
 import { ClaimDetailPage } from '@features/claims/ClaimDetailPage';
 import { ClaimHistoryPage } from '@features/claims/ClaimHistoryPage';
+import { DocumentListPage } from '@features/documents/DocumentListPage';
+import { DocumentUploadPage } from '@features/documents/DocumentUploadPage';
+import { DocumentDetailPage } from '@features/documents/DocumentDetailPage';
 import { useAuth } from '@hooks/useAuth';
 
 export function AppRoutes() {
@@ -53,6 +56,10 @@ export function AppRoutes() {
       <Route path="/claims/new" element={<ClaimFormPage />} />
       <Route path="/claims/:id" element={<ClaimDetailPage />} />
       <Route path="/claims/:id/edit" element={<ClaimEditPage />} />
+
+      <Route path="/documents" element={<DocumentListPage />} />
+      <Route path="/documents/upload" element={<DocumentUploadPage />} />
+      <Route path="/documents/:id" element={<DocumentDetailPage />} />
 
       <Route path="*" element={<Navigate to="/customers" replace />} />
     </Routes>

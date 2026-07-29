@@ -9,3 +9,12 @@ coverage
 
 # Prisma generated client (regenerated via `prisma generate`)
 generated
+
+# Uploaded file content — folder structure is preserved via .gitkeep files,
+# but actual uploaded documents are never committed.
+uploads/customers/*
+uploads/policies/*
+uploads/claims/*
+!uploads/customers/.gitkeep
+!uploads/policies/.gitkeep
+!uploads/claims/.gitkeep

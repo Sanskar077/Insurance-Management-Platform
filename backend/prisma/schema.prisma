@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +56,21 @@ enum ClaimType {
   OTHER
 }
 
+enum DocumentEntityType {
+  CUSTOMER
+  POLICY
+  CLAIM
+}
+
+enum DocumentType {
+  ID_PROOF
+  ADDRESS_PROOF
+  POLICY_DOCUMENT
+  CLAIM_DOCUMENT
+  PHOTO
+  OTHER
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -72,7 +86,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  customer Customer?
+  customer          Customer?
+  uploadedDocuments Document[]
 
   @@index([role])
   @@map("users")
@@ -92,9 +107,8 @@ model Customer {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  policies  Policy[]
-  documents Document[]
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  policies Policy[]
 
   @@index([deletedAt])
   @@map("customers")
@@ -183,17 +197,32 @@ model PremiumPayment {
   @@map("premium_payments")
 }
 
+/// Polymorphic attachment — entityId references Customer.id, Policy.id, or
+/// Claim.id depending on entityType. No direct Prisma relation/FK is
+/// possible across three different target tables, so existence is validated
+/// at the application layer (document.service.ts) instead of by the
+/// database. See docs/document-management.md.
 model Document {
-  id         String   @id @default(uuid())
-  customerId String
-  fileName   String
-  filePath   String
-  uploadedAt DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String             @id @default(uuid())
+  entityType       DocumentEntityType
+  entityId         String
+  documentType     DocumentType
+  originalFileName String
+  storedFileName   String
+  mimeType         String
+  fileSize         Int
+  storagePath      String
+  uploadedBy       String
+  uploadedAt       DateTime           @default(now())
+  deletedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  uploadedByUser User @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
 
-  @@index([customerId])
+  @@index([entityType, entityId])
+  @@index([documentType])
+  @@index([deletedAt])
+  @@index([uploadedAt])
   @@map("documents")
 }

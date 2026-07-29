@@ -46,6 +46,14 @@ function buildWhere(options: FindManyOptions): Prisma.PolicyWhereInput {
 }
 
 export const policyRepository = {
+  async findAllIdsByCustomerId(customerId: string): Promise<string[]> {
+    const rows = await prisma.policy.findMany({
+      where: { customerId, deletedAt: null },
+      select: { id: true },
+    });
+    return rows.map((row: { id: string }) => row.id);
+  },
+
   async create(data: Prisma.PolicyCreateInput) {
     return prisma.policy.create({ data });
   },

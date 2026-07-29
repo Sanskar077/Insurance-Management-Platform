@@ -50,13 +50,20 @@ AND dueDate < now()`.
   (`ClaimStatus`: SUBMITTED/UNDER_REVIEW/APPROVED/REJECTED/CLOSED). `approvedAmount` is
   nullable (only set on approval). Status transitions are enforced by a state machine in
   `claim.service.ts` — see `docs/claim-management.md`.
-- **Document** — N:1 with Customer.
+- **Document** — polymorphic attachment (`entityType`: CUSTOMER/POLICY/CLAIM +
+  `entityId`) to Customer, Policy, or Claim — no direct FK is possible across three target
+  tables, so existence and ownership are validated at the application layer instead
+  (`document.service.ts`). `uploadedBy` is a normal FK to `User` (restrict delete).
+  File bytes live on local disk behind a `StorageService` interface
+  (`services/storage/`) so cloud storage can be swapped in later without touching business
+  logic. See `docs/document-management.md`.
 
 See [`docs/authentication.md`](./docs/authentication.md),
 [`docs/customer-management.md`](./docs/customer-management.md),
 [`docs/policy-management.md`](./docs/policy-management.md),
-[`docs/premium-tracking.md`](./docs/premium-tracking.md), and
-[`docs/claim-management.md`](./docs/claim-management.md) for module details.
+[`docs/premium-tracking.md`](./docs/premium-tracking.md),
+[`docs/claim-management.md`](./docs/claim-management.md), and
+[`docs/document-management.md`](./docs/document-management.md) for module details.
 
 ## Folder Structure
 
@@ -125,32 +132,36 @@ Or run commands directly inside `frontend/` or `backend/` using their own `packa
 
 ## Development Status
 
-This project follows a 14-day development plan. Current status: **Day 6 complete**
-(Claim Management: register/update/approve/reject/close claims, enforced workflow state
-machine, human-readable claim numbers, search, filters, sorting, pagination, role-based
-access control, and a responsive frontend). See `docs/` for what's planned in upcoming
-sessions.
+This project follows a 14-day development plan. Current status: **Day 7 complete**
+(Document Management: upload/view/download/soft-delete documents attached to customers,
+policies, or claims; local-disk storage behind a swappable StorageService abstraction;
+search, filters, sorting, pagination, role-based access control, and a responsive
+frontend with real upload progress). See `docs/` for what's planned in upcoming sessions.
 
 ## Known Issues
 
 **Prisma engine binaries could not be downloaded in the original development sandbox** —
 `binaries.prisma.sh` was not reachable from that environment's network egress rules, so
 `prisma generate` / `prisma migrate dev` could not be run there. This is an environment
-restriction, not a code or schema problem, and has held consistently across Days 2–6:
+restriction, not a code or schema problem, and has held consistently across Days 2–7:
 
-- Every schema change (Day 2's initial schema, Day 3's `Customer.deletedAt`, Day 4's Policy
-  enums/renewal relation, Day 5's `PaymentStatus` enum, Day 6's `ClaimStatus`/`ClaimType`
-  enums and claim-processing fields) was hand-verified by applying the migration SQL directly
-  to a local PostgreSQL instance — tables, enums, indexes, foreign keys, and constraints all
-  confirmed correct.
-- Day 6's claim workflow was verified end-to-end against the live database: a claim was
-  created, approved (with `approvedAmount` and `remarks` set), then closed — all three writes
-  confirmed with real `SELECT`s in between. The `claimNumber` uniqueness constraint was
-  confirmed to reject duplicates, and the `claims.policyId` foreign key (`onDelete: Restrict`)
-  was confirmed to block deleting a policy that still has claims attached.
-- Password hashing, JWT, and all Zod validators across every module (auth, customer, policy,
-  premium payment, and claim — including the claim workflow state machine's transition rules)
-  were verified in isolation with passing tests.
+- Every schema change (Day 2's initial schema through Day 7's polymorphic `Document`
+  redesign) was hand-verified by applying the migration SQL directly to a local PostgreSQL
+  instance — tables, enums, indexes, foreign keys, and constraints all confirmed correct.
+- Day 7's cross-table search (documents don't have a direct Prisma relation to Customer/
+  Policy/Claim, since the association is polymorphic) was verified end-to-end: a document
+  attached to a policy was correctly found by searching the policy's number. The
+  `uploadedBy` foreign key was confirmed to block deleting a user who has uploaded
+  documents, and soft delete was confirmed to hide a document from normal queries while
+  the row still physically exists.
+- The `LocalDiskStorageService` was fully exercised against the real filesystem (not just
+  read as code): save/read/delete round-trips, and — critically for the spec's security
+  requirements — path traversal via `../` in both the filename and subdirectory was
+  confirmed rejected, along with writes to any subdirectory outside the
+  customers/policies/claims allowlist.
+- Password hashing, JWT, and all Zod validators across every module — including Day 7's
+  upload metadata validation and the MIME-type/extension file allowlist — were verified in
+  isolation with passing tests.
 - TypeScript compiles cleanly except for lines that import types from `@prisma/client` —
   exactly the types `prisma generate` produces. These resolve automatically the moment
   `pnpm install` runs on a machine with normal internet access (a `postinstall` hook already
@@ -161,6 +172,29 @@ restriction, not a code or schema problem, and has held consistently across Days
 
 **No action is needed from you** beyond running `pnpm install` in `backend/` on a normal
 machine — everything will resolve itself.
+
+### Real bug found & fixed: Prisma 7's `prisma.config.ts` requirement
+
+Everything above was verified as thoroughly as the sandbox allowed, but one issue could only
+surface on a machine with actual internet access — which happened during Day 7, when
+`pnpm install` finally reached the real `prisma generate` step and failed with:
+
+```
+error: The datasource property `url` is no longer supported in schema files. Move connection
+URLs for Migrate to `prisma.config.ts` and pass either `adapter` for a direct database
+connection or `accelerateUrl` for Accelerate to the `PrismaClient` constructor.
+```
+
+This is a genuine Prisma 7 breaking change (not related to the sandbox network restriction
+above): as of Prisma 7, `schema.prisma`'s `datasource` block can no longer contain
+`url = env("DATABASE_URL")` directly — that URL now belongs in a `prisma.config.ts` file.
+**This has been fixed**: `schema.prisma`'s datasource block now only declares `provider`, and
+`backend/prisma.config.ts` supplies `DATABASE_URL` to the CLI instead. `@prisma/config` was
+added as a dependency. The fix was verified in the sandbox — schema validation now passes
+cleanly (`Loaded Prisma config from prisma.config.ts.`) and the only remaining failure is the
+same pre-existing sandbox network block described above, confirming this specific error is
+resolved. See `backend/prisma/README.md` for details. Nothing about `.env` or the generated
+`PrismaClient`'s runtime behavior changed — only the CLI-time config location.
 
 ## Contributing
 

@@ -4,6 +4,18 @@
 `Document`, plus a `Role` enum (`ADMIN`, `AGENT`, `CUSTOMER`). See the root README's
 "Database Schema" section for the full relationship diagram.
 
+## Configuration (`prisma.config.ts`)
+
+Prisma 7 removed support for writing `url = env("DATABASE_URL")` directly inside
+`schema.prisma`'s `datasource` block (error `P1012`). The connection URL now lives in
+`backend/prisma.config.ts` instead, read by every `prisma` CLI command (`generate`,
+`migrate`, `studio`, etc.). This does **not** change anything about the generated
+`PrismaClient` at runtime — it still reads `DATABASE_URL` from `process.env` exactly as
+before (`src/lib/prisma.ts`) — so nothing in `.env` or your deployment setup needs to change,
+only the CLI-time config file. If you see `P1012` again after pulling changes, confirm
+`prisma.config.ts` exists at the `backend/` root and that `@prisma/config` is installed
+(`pnpm add -D @prisma/config`).
+
 ## Migrations
 
 `migrations/20260721074141_init/migration.sql` creates all tables, the `Role` enum, unique

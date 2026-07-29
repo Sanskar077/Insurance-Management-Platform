@@ -55,6 +55,14 @@ function buildWhere(options: FindManyOptions): Prisma.ClaimWhereInput {
 }
 
 export const claimRepository = {
+  async findAllIdsByCustomerId(customerId: string): Promise<string[]> {
+    const rows = await prisma.claim.findMany({
+      where: { policy: { customerId }, deletedAt: null },
+      select: { id: true },
+    });
+    return rows.map((row: { id: string }) => row.id);
+  },
+
   async create(data: Prisma.ClaimCreateInput) {
     return prisma.claim.create({ data });
   },
