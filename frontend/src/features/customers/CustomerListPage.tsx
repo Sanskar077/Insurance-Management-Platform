@@ -162,53 +162,55 @@ export function CustomerListPage() {
 
         {status === 'idle' && customers.length > 0 && (
           <>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Phone</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customers.map((customer) => (
-                  <tr key={customer.id} className="border-t border-[var(--color-border)]">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar fullName={customer.fullName} size="sm" />
-                        <Link
-                          to={`/customers/${customer.id}`}
-                          className="font-medium text-[var(--color-ink-900)] hover:underline"
-                        >
-                          {customer.fullName}
-                        </Link>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">{customer.email}</td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">{customer.phone}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Link to={`/customers/${customer.id}`}>
-                          <Button variant="secondary" size="sm">
-                            View
-                          </Button>
-                        </Link>
-                        {canDelete && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => setPendingDeleteId(customer.id)}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Customer</th>
+                    <th className="px-4 py-3 font-medium">Email</th>
+                    <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {customers.map((customer) => (
+                    <tr key={customer.id} className="border-t border-[var(--color-border)]">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar fullName={customer.fullName} size="sm" />
+                          <Link
+                            to={`/customers/${customer.id}`}
+                            className="font-medium text-[var(--color-ink-900)] hover:underline"
+                          >
+                            {customer.fullName}
+                          </Link>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">{customer.email}</td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">{customer.phone}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <Link to={`/customers/${customer.id}`}>
+                            <Button variant="secondary" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                          {canDelete && (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => setPendingDeleteId(customer.id)}
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {meta && (
               <Pagination
                 meta={meta}

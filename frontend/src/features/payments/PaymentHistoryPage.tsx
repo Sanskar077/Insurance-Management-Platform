@@ -103,44 +103,46 @@ export function PaymentHistoryPage() {
           />
         ) : (
           <>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Due Date</th>
-                  <th className="px-4 py-3 font-medium">Payment Date</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment) => (
-                  <tr key={payment.id} className="border-t border-[var(--color-border)]">
-                    <td className="px-4 py-3 font-medium text-[var(--color-ink-900)]">
-                      {formatMoney(payment.amount)}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {new Date(payment.dueDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {payment.paymentDate
-                        ? new Date(payment.paymentDate).toLocaleDateString()
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={payment.paymentStatus} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link to={`/premium-payments/${payment.id}`}>
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </Link>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Amount</th>
+                    <th className="px-4 py-3 font-medium">Due Date</th>
+                    <th className="px-4 py-3 font-medium">Payment Date</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="border-t border-[var(--color-border)]">
+                      <td className="px-4 py-3 font-medium text-[var(--color-ink-900)]">
+                        {formatMoney(payment.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {new Date(payment.dueDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {payment.paymentDate
+                          ? new Date(payment.paymentDate).toLocaleDateString()
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={payment.paymentStatus} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link to={`/premium-payments/${payment.id}`}>
+                          <Button variant="secondary" size="sm">
+                            View
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {meta && (
               <Pagination meta={meta} onPageChange={handlePageChange} itemLabel="payments" />
             )}

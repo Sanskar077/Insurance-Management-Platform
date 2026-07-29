@@ -206,80 +206,84 @@ export function PolicyListPage() {
 
         {loadStatus === 'idle' && policies.length > 0 && (
           <>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Policy #</th>
-                  <th className="px-4 py-3 font-medium">Type</th>
-                  <th className="px-4 py-3 font-medium">Premium</th>
-                  <th className="px-4 py-3 font-medium">Coverage</th>
-                  <th className="px-4 py-3 font-medium">End Date</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {policies.map((policy) => (
-                  <tr key={policy.id} className="border-t border-[var(--color-border)]">
-                    <td className="px-4 py-3">
-                      <Link
-                        to={`/policies/${policy.id}`}
-                        className="font-medium text-[var(--color-ink-900)] hover:underline"
-                      >
-                        {policy.policyNumber}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">{policy.policyType}</td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {formatMoney(policy.premiumAmount)}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {formatMoney(policy.coverageAmount)}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {new Date(policy.endDate).toLocaleDateString()}
-                      {policy.isExpired && policy.status === 'ACTIVE' && (
-                        <span className="ml-2 text-xs font-medium text-[var(--color-warning-600)]">
-                          overdue
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={policy.status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Link to={`/policies/${policy.id}`}>
-                          <Button variant="secondary" size="sm">
-                            View
-                          </Button>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Policy #</th>
+                    <th className="px-4 py-3 font-medium">Type</th>
+                    <th className="px-4 py-3 font-medium">Premium</th>
+                    <th className="px-4 py-3 font-medium">Coverage</th>
+                    <th className="px-4 py-3 font-medium">End Date</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {policies.map((policy) => (
+                    <tr key={policy.id} className="border-t border-[var(--color-border)]">
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/policies/${policy.id}`}
+                          className="font-medium text-[var(--color-ink-900)] hover:underline"
+                        >
+                          {policy.policyNumber}
                         </Link>
-                        {canCancel &&
-                          policy.status !== 'CANCELLED' &&
-                          policy.status !== 'RENEWED' && (
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {policy.policyType}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {formatMoney(policy.premiumAmount)}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {formatMoney(policy.coverageAmount)}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {new Date(policy.endDate).toLocaleDateString()}
+                        {policy.isExpired && policy.status === 'ACTIVE' && (
+                          <span className="ml-2 text-xs font-medium text-[var(--color-warning-600)]">
+                            overdue
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={policy.status} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-2">
+                          <Link to={`/policies/${policy.id}`}>
+                            <Button variant="secondary" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                          {canCancel &&
+                            policy.status !== 'CANCELLED' &&
+                            policy.status !== 'RENEWED' && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setPendingCancelId(policy.id)}
+                              >
+                                Cancel
+                              </Button>
+                            )}
+                          {canDelete && (
                             <Button
-                              variant="secondary"
+                              variant="danger"
                               size="sm"
-                              onClick={() => setPendingCancelId(policy.id)}
+                              onClick={() => setPendingDeleteId(policy.id)}
                             >
-                              Cancel
+                              Delete
                             </Button>
                           )}
-                        {canDelete && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => setPendingDeleteId(policy.id)}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {meta && (
               <Pagination
                 meta={meta}

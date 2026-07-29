@@ -25,7 +25,7 @@ export function SearchBar({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
-        aria-label="Search customers"
+        aria-label={placeholder}
         className="w-full max-w-sm rounded-md border border-[var(--color-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-ink-700)] focus:ring-2 focus:ring-[var(--color-ink-700)]/15"
       />
       <button

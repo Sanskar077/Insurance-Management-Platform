@@ -112,7 +112,7 @@ export function GlobalSearch() {
       results.documents.length > 0);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-md">
+    <div ref={containerRef} className="relative w-full max-w-md min-w-0">
       <input
         type="search"
         value={query}
@@ -120,6 +120,9 @@ export function GlobalSearch() {
         onFocus={() => results && setIsOpen(true)}
         placeholder="Search customers, policies, claims…"
         aria-label="Global search"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         className="w-full rounded-md border border-[var(--color-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-ink-700)] focus:ring-2 focus:ring-[var(--color-ink-700)]/15"
       />
 

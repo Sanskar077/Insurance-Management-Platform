@@ -253,73 +253,75 @@ export function UserListPage() {
 
         {status === 'idle' && users.length > 0 && (
           <>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
-                <tr>
-                  <th className="px-4 py-3 font-medium">User</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Role</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
-                  <th className="px-4 py-3 font-medium">Change Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => {
-                  const isSelf = user.id === userId;
-                  const isLockedCustomer = user.hasCustomerProfile;
-                  return (
-                    <tr key={user.id} className="border-t border-[var(--color-border)]">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar fullName={user.name} size="sm" />
-                          <span className="font-medium text-[var(--color-ink-900)]">
-                            {user.name}
-                            {isSelf && (
-                              <span className="ml-2 text-xs text-[var(--color-slate-500)]">
-                                (you)
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[var(--color-slate-600)]">{user.email}</td>
-                      <td className="px-4 py-3">
-                        <RoleBadge role={user.role} />
-                      </td>
-                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {isSelf ? (
-                          <span className="text-xs text-[var(--color-slate-500)]">
-                            Cannot change own role
-                          </span>
-                        ) : isLockedCustomer ? (
-                          <span className="text-xs text-[var(--color-slate-500)]">
-                            Customer account
-                          </span>
-                        ) : (
-                          <select
-                            value={user.role}
-                            onChange={(event) => {
-                              const nextRole = event.target.value as 'ADMIN' | 'AGENT';
-                              if (nextRole !== user.role) {
-                                setPendingChange({ user, nextRole });
-                              }
-                            }}
-                            aria-label={`Change role for ${user.name}`}
-                            className="rounded-md border border-[var(--color-border)] bg-white px-2 py-1.5 text-sm text-[var(--color-ink-900)] outline-none focus:border-[var(--color-ink-700)]"
-                          >
-                            <option value="AGENT">AGENT</option>
-                            <option value="ADMIN">ADMIN</option>
-                          </select>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">User</th>
+                    <th className="px-4 py-3 font-medium">Email</th>
+                    <th className="px-4 py-3 font-medium">Role</th>
+                    <th className="px-4 py-3 font-medium">Created</th>
+                    <th className="px-4 py-3 font-medium">Change Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => {
+                    const isSelf = user.id === userId;
+                    const isLockedCustomer = user.hasCustomerProfile;
+                    return (
+                      <tr key={user.id} className="border-t border-[var(--color-border)]">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar fullName={user.name} size="sm" />
+                            <span className="font-medium text-[var(--color-ink-900)]">
+                              {user.name}
+                              {isSelf && (
+                                <span className="ml-2 text-xs text-[var(--color-slate-500)]">
+                                  (you)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-[var(--color-slate-600)]">{user.email}</td>
+                        <td className="px-4 py-3">
+                          <RoleBadge role={user.role} />
+                        </td>
+                        <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          {isSelf ? (
+                            <span className="text-xs text-[var(--color-slate-500)]">
+                              Cannot change own role
+                            </span>
+                          ) : isLockedCustomer ? (
+                            <span className="text-xs text-[var(--color-slate-500)]">
+                              Customer account
+                            </span>
+                          ) : (
+                            <select
+                              value={user.role}
+                              onChange={(event) => {
+                                const nextRole = event.target.value as 'ADMIN' | 'AGENT';
+                                if (nextRole !== user.role) {
+                                  setPendingChange({ user, nextRole });
+                                }
+                              }}
+                              aria-label={`Change role for ${user.name}`}
+                              className="rounded-md border border-[var(--color-border)] bg-white px-2 py-1.5 text-sm text-[var(--color-ink-900)] outline-none focus:border-[var(--color-ink-700)]"
+                            >
+                              <option value="AGENT">AGENT</option>
+                              <option value="ADMIN">ADMIN</option>
+                            </select>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             {meta && (
               <Pagination
                 meta={meta}

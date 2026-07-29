@@ -186,63 +186,65 @@ export function DocumentListPage() {
 
         {status === 'idle' && documents.length > 0 && (
           <>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Filename</th>
-                  <th className="px-4 py-3 font-medium">Entity</th>
-                  <th className="px-4 py-3 font-medium">Type</th>
-                  <th className="px-4 py-3 font-medium">Size</th>
-                  <th className="px-4 py-3 font-medium">Uploaded</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documents.map((doc) => (
-                  <tr key={doc.id} className="border-t border-[var(--color-border)]">
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => navigate(`/documents/${doc.id}`)}
-                        className="font-medium text-[var(--color-ink-900)] hover:underline"
-                      >
-                        {doc.originalFileName}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">{doc.entityType}</td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {doc.documentType.replace('_', ' ')}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {formatFileSize(doc.fileSize)}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-slate-600)]">
-                      {new Date(doc.uploadedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleDownload(doc)}
-                          isLoading={isActing === doc.id}
-                        >
-                          Download
-                        </Button>
-                        {canDelete && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => setPendingDeleteId(doc.id)}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-[var(--color-surface-muted)] text-xs uppercase tracking-wide text-[var(--color-slate-500)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Filename</th>
+                    <th className="px-4 py-3 font-medium">Entity</th>
+                    <th className="px-4 py-3 font-medium">Type</th>
+                    <th className="px-4 py-3 font-medium">Size</th>
+                    <th className="px-4 py-3 font-medium">Uploaded</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {documents.map((doc) => (
+                    <tr key={doc.id} className="border-t border-[var(--color-border)]">
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => navigate(`/documents/${doc.id}`)}
+                          className="font-medium text-[var(--color-ink-900)] hover:underline"
+                        >
+                          {doc.originalFileName}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">{doc.entityType}</td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {doc.documentType.replace('_', ' ')}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {formatFileSize(doc.fileSize)}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--color-slate-600)]">
+                        {new Date(doc.uploadedAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleDownload(doc)}
+                            isLoading={isActing === doc.id}
+                          >
+                            Download
+                          </Button>
+                          {canDelete && (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => setPendingDeleteId(doc.id)}
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {meta && (
               <Pagination
                 meta={meta}
