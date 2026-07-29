@@ -31,3 +31,8 @@ coverage/
 
 # Husky internal
 .husky/_/
+# Claude Internal
+.claude/
+.claude/_/
+.claude/*
+

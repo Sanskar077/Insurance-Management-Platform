@@ -4,7 +4,8 @@ import { useAuth } from '@hooks/useAuth';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { label: string; to: string; hideForCustomer?: boolean }[] = [
+  { label: 'Dashboard', to: '/dashboard', hideForCustomer: true },
   { label: 'Customers', to: '/customers' },
   { label: 'Policies', to: '/policies' },
   { label: 'Premium Payments', to: '/premium-payments' },
@@ -32,22 +33,24 @@ export function AppShell({ children }: { children: ReactNode }) {
           Insurance<span className="text-[var(--color-amber-400)]">MP</span>
         </p>
         <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => {
-            const active = location.pathname.startsWith(item.to);
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {NAV_ITEMS.filter((item) => !(item.hideForCustomer && role === 'CUSTOMER')).map(
+            (item) => {
+              const active = location.pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            },
+          )}
         </nav>
       </aside>
 

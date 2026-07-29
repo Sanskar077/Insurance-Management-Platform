@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { DashboardPage } from '@features/reports/DashboardPage';
 import { CustomerListPage } from '@features/customers/CustomerListPage';
 import { CustomerFormPage } from '@features/customers/CustomerFormPage';
 import { CustomerDetailPage } from '@features/customers/CustomerDetailPage';
@@ -27,7 +28,15 @@ export function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/customers" replace />} />
+      <Route
+        path="/"
+        element={<Navigate to={role === 'CUSTOMER' ? '/customers' : '/dashboard'} replace />}
+      />
+      {/* Reports aggregate business-wide figures — ADMIN/AGENT only (mirrors backend RBAC). */}
+      <Route
+        path="/dashboard"
+        element={role === 'CUSTOMER' ? <Navigate to="/customers" replace /> : <DashboardPage />}
+      />
       <Route path="/customers" element={<CustomerListPage />} />
       <Route path="/customers/new" element={<CustomerFormPage />} />
       <Route
