@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { AppShell } from '@components/layout/AppShell';
 import { LoginPage } from '@features/auth/LoginPage';
+import { RegisterPage } from '@features/auth/RegisterPage';
 import { DashboardPage } from '@features/reports/DashboardPage';
 import { CustomerListPage } from '@features/customers/CustomerListPage';
 import { CustomerFormPage } from '@features/customers/CustomerFormPage';
@@ -51,6 +52,11 @@ export function AppRoutes() {
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+
+      <Route
+        path="/register"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />}
       />
 
       <Route

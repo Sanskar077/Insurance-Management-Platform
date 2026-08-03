@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '@services/auth.service';
 import { useAuth } from '@hooks/useAuth';
 import { Button } from '@components/ui/Button';
@@ -84,6 +84,16 @@ export function LoginPage() {
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
+
+          <p className="mt-5 text-center text-sm text-[var(--color-slate-500)]">
+            Don&apos;t have an account?{' '}
+            <Link
+              to="/register"
+              className="font-medium text-[var(--color-ink-900)] hover:underline"
+            >
+              Register
+            </Link>
+          </p>
         </div>
       </div>
     </div>
